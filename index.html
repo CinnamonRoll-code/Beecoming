@@ -3,256 +3,156 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>蜂年 · Gate 0 原型</title>
+<title>蜂年 · Gate 0 原型 v2</title>
 <style>
   :root {
-    --bg: #F5F1E8;
-    --bg-panel: #EBE4D8;
-    --bg-deep: #E8DFD0;
-    --text: #3A3229;
-    --text-soft: #7A6E5F;
-    --line: #D4C9B6;
-    --amber: #D4B85A;
-    --amber-deep: #B8983A;
-    --red: #B85C4A;
-    --green: #7A8B5C;
-    --forage: #E5B033;
-    --nurse: #8B6BA8;
-    --guard: #C4453F;
+    --bg: #F5F1E8; --bg-panel: #EBE4D8; --bg-deep: #E8DFD0;
+    --text: #3A3229; --text-soft: #7A6E5F; --line: #D4C9B6;
+    --amber: #D4B85A; --amber-deep: #B8983A;
+    --red: #B85C4A; --green: #7A8B5C;
+    --forage: #E5B033; --nurse: #8B6BA8; --guard: #C4453F; --build: #5B8A72;
   }
   :root:not([data-theme="light"]) {
     @media (prefers-color-scheme: dark) {
-      --bg: #211C15;
-      --bg-panel: #2A2419;
-      --bg-deep: #322B1E;
-      --text: #EDE6D8;
-      --text-soft: #B0A490;
-      --line: #423A2A;
+      --bg: #211C15; --bg-panel: #2A2419; --bg-deep: #322B1E;
+      --text: #EDE6D8; --text-soft: #B0A490; --line: #423A2A;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #211C15;
-    --bg-panel: #2A2419;
-    --bg-deep: #322B1E;
-    --text: #EDE6D8;
-    --text-soft: #B0A490;
-    --line: #423A2A;
+    --bg: #211C15; --bg-panel: #2A2419; --bg-deep: #322B1E;
+    --text: #EDE6D8; --text-soft: #B0A490; --line: #423A2A;
   }
-
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
+    margin: 0; background: var(--bg); color: var(--text);
     font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    line-height: 1.5;
+    line-height: 1.55;
   }
-  .wrap {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 28px 20px 60px;
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 18px 60px; }
+  header { text-align: center; margin-bottom: 18px; }
+  header h1 { font-size: 21px; margin: 0 0 4px; }
+  header p { color: var(--text-soft); font-size: 13px; margin: 0; }
+
+  .intro {
+    background: var(--bg-deep); border-radius: 10px;
+    padding: 14px 18px; margin-bottom: 16px; font-size: 13.5px;
   }
-  header {
-    text-align: center;
-    margin-bottom: 24px;
-  }
-  header h1 {
-    font-size: 22px;
-    margin: 0 0 4px;
-    letter-spacing: 0.02em;
-  }
-  header p {
-    color: var(--text-soft);
-    font-size: 13px;
-    margin: 0;
+  .intro b { color: var(--amber-deep); }
+  .intro .close {
+    float: right; cursor: pointer; color: var(--text-soft);
+    font-size: 12px; background: none; border: none; padding: 0;
   }
 
   .state-bar {
-    display: flex;
-    justify-content: space-between;
-    background: var(--bg-panel);
-    border-radius: 10px;
-    padding: 14px 18px;
-    margin-bottom: 18px;
-    font-size: 14px;
+    display: flex; justify-content: space-between;
+    background: var(--bg-panel); border-radius: 10px;
+    padding: 13px 16px; margin-bottom: 12px; font-size: 14px;
   }
   .state-bar .stat { text-align: center; flex: 1; }
-  .state-bar .stat .num { font-size: 20px; font-weight: 600; display: block; }
-  .state-bar .stat .label { color: var(--text-soft); font-size: 12px; }
+  .state-bar .stat .num { font-size: 19px; font-weight: 600; display: block; }
+  .state-bar .stat .label { color: var(--text-soft); font-size: 11.5px; }
 
-  .panel {
-    background: var(--bg-panel);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
+  .forecast {
+    background: var(--bg-deep); border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 14px; font-size: 13px;
+    display: flex; gap: 18px; flex-wrap: wrap;
   }
-  .panel h2 {
-    font-size: 15px;
-    margin: 0 0 14px;
-    font-weight: 600;
-  }
+  .forecast b { color: var(--text); }
 
-  .slider-row {
-    margin-bottom: 16px;
-  }
+  .panel { background: var(--bg-panel); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+  .panel h2 { font-size: 15px; margin: 0 0 6px; font-weight: 600; }
+  .panel .sub { color: var(--text-soft); font-size: 12.5px; margin: 0 0 14px; }
+
+  .slider-row { margin-bottom: 13px; }
   .slider-row .row-top {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    margin-bottom: 6px;
+    display: flex; justify-content: space-between;
+    font-size: 13px; margin-bottom: 5px; align-items: baseline; gap: 8px;
   }
   .slider-row .row-top .name { display: flex; align-items: center; gap: 6px; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .slider-row .row-top .name small { color: var(--text-soft); font-size: 11.5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
   .dot.forage { background: var(--forage); }
   .dot.nurse { background: var(--nurse); }
   .dot.guard { background: var(--guard); }
-  .slider-row .row-top .count { font-weight: 600; }
+  .dot.build { background: var(--build); }
+  .slider-row .row-top .count { font-weight: 600; white-space: nowrap; }
+  .slider-row .inherit { font-size: 11px; color: var(--text-soft); margin-top: 2px; }
 
   input[type=range] {
-    width: 100%;
-    height: 6px;
-    border-radius: 3px;
-    background: var(--bg-deep);
-    outline: none;
-    -webkit-appearance: none;
+    width: 100%; height: 6px; border-radius: 3px;
+    background: var(--bg-deep); outline: none; -webkit-appearance: none;
   }
   input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--text);
-    cursor: pointer;
-    border: 2px solid var(--bg-panel);
+    -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--text); cursor: pointer; border: 2px solid var(--bg-panel);
   }
   input[type=range]::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--text);
-    cursor: pointer;
-    border: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--text); cursor: pointer; border: none;
   }
   input[type=range].forage::-webkit-slider-thumb { background: var(--forage); }
   input[type=range].nurse::-webkit-slider-thumb { background: var(--nurse); }
   input[type=range].guard::-webkit-slider-thumb { background: var(--guard); }
+  input[type=range].build::-webkit-slider-thumb { background: var(--build); }
 
-  .bar-total {
-    display: flex;
-    height: 14px;
-    border-radius: 7px;
-    overflow: hidden;
-    margin-top: 4px;
+  .bar-total { display: flex; height: 13px; border-radius: 7px; overflow: hidden; margin-top: 6px; }
+  .bar-total div { transition: width 0.15s; }
+
+  .estimate { background: var(--bg-deep); border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
+  .estimate .e-title { font-size: 12.5px; color: var(--text-soft); margin-bottom: 10px; }
+  .e-row {
+    display: flex; justify-content: space-between; gap: 10px;
+    padding: 5px 0; font-size: 13.5px; border-bottom: 1px dashed var(--line);
   }
-  .bar-total div { transition: width 0.2s; }
+  .e-row:last-of-type { border-bottom: none; }
+  .e-row .e-val { font-weight: 600; white-space: nowrap; }
+  .e-row.danger .e-val { color: var(--red); }
+  .e-row.mid .e-val { color: var(--amber-deep); }
+  .e-row.ok .e-val { color: var(--green); }
+
+  .warnings { margin-top: 10px; }
+  .warn-item {
+    background: rgba(184,92,74,0.14); border-left: 3px solid var(--red);
+    padding: 7px 11px; border-radius: 0 6px 6px 0; font-size: 12.5px; margin-bottom: 6px;
+  }
+  .warn-item.mild { background: rgba(212,184,90,0.16); border-left-color: var(--amber-deep); }
+  .warn-item.good { background: rgba(122,139,92,0.14); border-left-color: var(--green); }
 
   button {
-    font-family: inherit;
-    font-size: 14px;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 20px;
-    cursor: pointer;
-    font-weight: 600;
+    font-family: inherit; font-size: 14px; border: none;
+    border-radius: 8px; padding: 12px 20px; cursor: pointer; font-weight: 600;
   }
-  .btn-primary {
-    background: var(--text);
-    color: var(--bg);
-    width: 100%;
-  }
+  .btn-primary { background: var(--text); color: var(--bg); width: 100%; }
   .btn-primary:hover { background: var(--amber-deep); }
-  .btn-row {
-    display: flex;
-    gap: 10px;
-    margin-top: 14px;
-  }
-  .btn-row button {
-    flex: 1;
-    background: var(--bg-deep);
-    color: var(--text);
-  }
+  .btn-row { display: flex; gap: 10px; margin-top: 14px; }
+  .btn-row button { flex: 1; background: var(--bg-deep); color: var(--text); }
   .btn-row button:hover { background: var(--line); }
-  .btn-row button.recommend {
-    background: var(--amber);
-    color: var(--text);
-  }
+  .btn-row button.recommend { background: var(--amber); color: #3A3229; }
 
-  .season {
-    border-left: 3px solid var(--line);
-    padding: 6px 0 6px 14px;
-    margin-bottom: 10px;
-    font-size: 13.5px;
-  }
-  .season .head {
-    font-weight: 600;
-    margin-bottom: 3px;
-  }
+  .season { border-left: 3px solid var(--line); padding: 6px 0 6px 13px; margin-bottom: 10px; font-size: 13.5px; }
+  .season .head { font-weight: 600; margin-bottom: 3px; }
   .season .body { color: var(--text-soft); }
   .season.warn { border-left-color: var(--red); }
   .season.good { border-left-color: var(--green); }
 
-  .verdict {
-    border-radius: 10px;
-    padding: 16px 18px;
-    margin: 14px 0;
-    font-size: 14px;
-  }
-  .verdict.survive {
-    background: rgba(122,139,92,0.15);
-    border: 1px solid var(--green);
-  }
-  .verdict.pyrrhic {
-    background: rgba(212,184,90,0.18);
-    border: 1px solid var(--amber-deep);
-  }
-  .verdict.collapse {
-    background: rgba(184,92,74,0.15);
-    border: 1px solid var(--red);
-  }
-  .verdict .big {
-    font-size: 17px;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  .verdict ul {
-    margin: 6px 0 0;
-    padding-left: 18px;
-  }
+  .verdict { border-radius: 10px; padding: 16px 18px; margin: 14px 0; font-size: 14px; }
+  .verdict.survive { background: rgba(122,139,92,0.15); border: 1px solid var(--green); }
+  .verdict.pyrrhic { background: rgba(212,184,90,0.18); border: 1px solid var(--amber-deep); }
+  .verdict.collapse { background: rgba(184,92,74,0.15); border: 1px solid var(--red); }
+  .verdict .big { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .verdict ul { margin: 6px 0 0; padding-left: 18px; }
   .verdict li { margin-bottom: 4px; }
 
-  .history {
-    font-size: 12.5px;
-    color: var(--text-soft);
-  }
-  .history .h-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 8px;
-  }
+  .history { font-size: 12.5px; color: var(--text-soft); }
+  .history .h-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
   .history-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 10px;
+    padding: 6px 0; border-bottom: 1px solid var(--line);
   }
   .history-item:last-child { border-bottom: none; }
-  .tag {
-    display: inline-block;
-    padding: 1px 7px;
-    border-radius: 10px;
-    font-size: 11px;
-    margin-left: 6px;
-  }
+  .tag { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; margin-left: 6px; }
   .tag.ok { background: rgba(122,139,92,0.25); color: var(--green); }
   .tag.no { background: rgba(184,92,74,0.25); color: var(--red); }
-
-  .hint {
-    font-size: 12px;
-    color: var(--text-soft);
-    text-align: center;
-    margin-top: 6px;
-  }
 
   #resultArea { display: none; }
 </style>
@@ -261,59 +161,85 @@
 <div class="wrap">
 
   <header>
-    <h1>🐝 蜂年 · Gate 0 原型</h1>
-    <p>核心问题：我现在应该把有限的蜂,投入到哪里?</p>
+    <h1>🐝 蜂年 · Gate 0 原型 v2</h1>
+    <p>核心问题：我现在应该把有限的蜂，投入到哪里？</p>
   </header>
+
+  <div class="intro" id="introBox">
+    <button class="close" id="closeIntro">收起 ✕</button>
+    <b>目标：让蜂群活过每一个冬天，并且越来越大。</b><br>
+    越冬要烧<b>蜂蜜</b>，蜜靠<b>采集蜂</b>；蜂群变大靠<b>育幼蜂</b>；
+    <b>胡蜂</b>夏秋来袭，要靠<b>守卫蜂</b>焖杀；
+    所有蜂和蜜都要住进<b>巢房</b>，巢房不够冬天会冻死蜂 —— 巢房靠<b>筑巢蜂</b>造。<br>
+    <span style="color:var(--text-soft)">四个岗位抢同一批蜂。年初有花期和冬季预报，但<b>每一季都可能出意外</b> —— 暴雨、干旱、螨害、熊，也可能是天上掉下来的好运。</span>
+  </div>
 
   <div class="state-bar">
     <div class="stat"><span class="num" id="yearNum">1</span><span class="label">第几年</span></div>
     <div class="stat"><span class="num" id="beeNum">100</span><span class="label">工蜂总数</span></div>
     <div class="stat"><span class="num" id="honeyNum">0</span><span class="label">开局储蜜</span></div>
+    <div class="stat"><span class="num" id="cellNum">120</span><span class="label">巢房容量</span></div>
   </div>
 
-  <p class="hint" id="threatInfo" style="margin-bottom:16px;"></p>
+  <div class="forecast" id="forecastBox"></div>
 
   <div class="panel" id="allocPanel">
     <h2>分配今年的工蜂</h2>
+    <p class="sub" id="allocSub">滑块数值是<b>实际蜂数</b>，拖一个，其余会自动让位</p>
 
     <div class="slider-row">
       <div class="row-top">
-        <span class="name"><span class="dot forage"></span>采集(蜂蜜/花粉,但防御弱)</span>
-        <span class="count" id="forageCount">45 只</span>
+        <span class="name"><span class="dot forage"></span>采集 <small>产蜂蜜 → 越冬燃料</small></span>
+        <span class="count" id="forageCount">40 只</span>
       </div>
-      <input type="range" class="forage" id="forageSlider" min="0" max="100" value="45">
+      <input type="range" class="forage" id="forageSlider" min="0" max="100" value="40">
+      <div class="inherit" id="forageInherit"></div>
     </div>
 
     <div class="slider-row">
       <div class="row-top">
-        <span class="name"><span class="dot nurse"></span>育幼(未来蜂量,当前产出↓)</span>
-        <span class="count" id="nurseCount">30 只</span>
+        <span class="name"><span class="dot nurse"></span>育幼 <small>生新蜂 → 明年更大</small></span>
+        <span class="count" id="nurseCount">25 只</span>
       </div>
-      <input type="range" class="nurse" id="nurseSlider" min="0" max="100" value="30">
+      <input type="range" class="nurse" id="nurseSlider" min="0" max="100" value="25">
+      <div class="inherit" id="nurseInherit"></div>
     </div>
 
     <div class="slider-row">
       <div class="row-top">
-        <span class="name"><span class="dot guard"></span>守卫(防胡蜂,不产出)</span>
-        <span class="count" id="guardCount">25 只</span>
+        <span class="name"><span class="dot guard"></span>守卫 <small>防胡蜂 → 不产出</small></span>
+        <span class="count" id="guardCount">20 只</span>
       </div>
-      <input type="range" class="guard" id="guardSlider" min="0" max="100" value="25">
+      <input type="range" class="guard" id="guardSlider" min="0" max="100" value="20">
+      <div class="inherit" id="guardInherit"></div>
+    </div>
+
+    <div class="slider-row">
+      <div class="row-top">
+        <span class="name"><span class="dot build"></span>筑巢 <small>造巢房 → 住蜂和存蜜</small></span>
+        <span class="count" id="buildCount">15 只</span>
+      </div>
+      <input type="range" class="build" id="buildSlider" min="0" max="100" value="15">
+      <div class="inherit" id="buildInherit"></div>
     </div>
 
     <div class="bar-total" id="barTotal"></div>
-    <p class="hint">拖一个滑块,另外两个会自动调整;滑块数值是<b>实际蜂数</b>,会随蜂群规模变化</p>
 
-    <button class="btn-primary" id="startBtn" style="margin-top:16px;">派出这一年 →</button>
+    <div class="estimate">
+      <div class="e-title">🐝 老蜂农的预感（只是感觉，不是账本 —— 实际还看天时和运气）</div>
+      <div id="estRows"></div>
+      <div class="warnings" id="warnBox"></div>
+    </div>
+
+    <button class="btn-primary" id="startBtn" style="margin-top:14px;">派出这一年 →</button>
   </div>
 
   <div id="resultArea">
-    <div class="panel" id="seasonPanel">
+    <div class="panel">
       <h2>这一年发生了什么</h2>
       <div id="seasonLog"></div>
     </div>
-
     <div class="verdict" id="verdictBox"></div>
-
     <div class="btn-row" id="actionRow"></div>
   </div>
 
@@ -325,353 +251,508 @@
 </div>
 
 <script>
-// ============ 可调参数(试玩后按需修改这里) ============
+// ============ 可调参数 ============
 const CONFIG = {
-  honeyPerForager: 0.6,       // 每只采集蜂每季产蜜(含随机浮动 ±25%)
-  nurseGrowthRate: 0.28,      // 每只育幼蜂每季转化出的新蜂数(原 0.45 太高,导致蜂口暴涨但蜜跟不上)
-  nurseHoneyCost: 0.55,       // 每个新蜂消耗的蜂蜜(育幼的隐性成本;调高以抑制"疯狂育幼"策略)
-  winterHoneyPerBee: 0.85,    // 越冬需要:每只蜂消耗的蜂蜜(原 1.05 偏高,配合上面两条一起调)
-  hornetChance: { spring: 0.15, summer: 0.55, autumn: 0.25 }, // 各季胡蜂来袭概率
-  hornetBaseStrength: 16,     // 一次胡蜂来袭平均需要多少只守卫蜂才能焖杀成功(基准值,不随你蜂群规模变化)
-  hornetDifficultyGrowth: 0.15,   // 上一年"守住且蜂群没缩水"→ 威胁难度倍率 +0.15
-  hornetDifficultyRelief: 0.12,   // 上一年"明显缩水"→ 威胁难度倍率 -0.12(给喘息空间,不是继续加压)
-  hornetDifficultyFloor: 0.5,     // 威胁难度倍率的下限,不会无限降
-  underdogThreshold: 0.7,     // 当前蜂群 < 历史峰值×此比例 → 判定为"弱势蜂群"
-  underdogDiscount: 0.6,      // 弱势蜂群触发"翻盘保护":本年威胁强度打这个折扣
-  guardLossOnWin: 0.10,       // 焖杀成功时,参战守卫蜂的损失比例
-  raidHoneyLossFactor: 1.2,   // 焖杀失败时,按缺口比例损失蜂蜜的倍率
-  raidBeeLossFactor: 0.5,     // 焖杀失败时,按缺口比例损失蜂(采集+育幼)的倍率
-  minColonySize: 12,          // 低于这个数量视为蜂群崩溃
-  carryoverRatio: 0.5,        // 存活时,多余储蜜有多少能带到下一年(简化:开局蜜)
+  honeyPerForager: 0.62,
+  nurseGrowthRate: 0.30,
+  nurseHoneyCost: 0.5,
+  cellsPerBuilder: 1.1,
+  cellsPerBee: 0.75,
+  cellsPerHoney: 0.35,
+  startingCells: 120,
+  winterHoneyPerBee: 0.8,
+  crowdingDeathRate: 0.55,
+  hornetChance: { spring: 0.15, summer: 0.55, autumn: 0.28 },
+  eventChance: 0.32,          // 每季触发突发事件的概率
+  omenChance: 0.45,           // 年初出现"不祥预感"前兆的概率
+  omenEventBoost: 0.18,       // 有前兆的年份,事件概率额外增加
+  hornetBaseStrength: 15,
+  hornetDifficultyGrowth: 0.14,
+  hornetDifficultyRelief: 0.12,
+  hornetDifficultyFloor: 0.5,
+  underdogThreshold: 0.7,
+  underdogDiscount: 0.6,
+  guardLossOnWin: 0.10,
+  raidHoneyLossFactor: 1.2,
+  raidBeeLossFactor: 0.5,
+  minColonySize: 12,
+  carryoverRatio: 0.5,
 };
-// =======================================================
+// ==================================
+
+// ===== 季节突发事件池 =====
+// 设计原则:不只是坏运气。有惩罚也有机遇,少数可被分配抵抗(把随机从"惩罚"变成"决策")
+const EVENTS = [
+  // --- 惩罚类 ---
+  { id:'rain', w:14, label:'🌧 连日暴雨', season:['spring','summer'],
+    desc:'蜂出不了巢，这一季采蜜大幅减产',
+    apply: s => { s.honeyMult = 0.45; } },
+  { id:'drought', w:11, label:'☀️ 干旱', season:['summer','autumn'],
+    desc:'花提前枯萎，采蜜减产，下一季也受影响',
+    apply: s => { s.honeyMult = 0.55; s.nextSeasonPenalty = 0.8; } },
+  { id:'mite', w:11, label:'🦠 螨害爆发', season:['spring','summer','autumn'],
+    desc:'幼虫大量夭折，这一季育幼几乎白干',
+    apply: s => { s.broodMult = 0.25; } },
+  { id:'bear', w:6, label:'🐻 熊来袭', season:['summer','autumn'],
+    desc:'储蜜被掏走一大块，巢脾也被拍碎不少',
+    apply: s => { s.honeyLossPct = 0.35; s.cellLossPct = 0.22; } },
+  { id:'chill', w:9, label:'🌡 倒春寒', season:['spring'],
+    desc:'气温骤降，一批蜂没熬住',
+    apply: s => { s.beeLossPct = 0.08; } },
+  { id:'robbing', w:8, label:'🐝 盗蜂来犯', season:['autumn'],
+    desc:'别家蜂群闻着蜜味来抢 —— 守卫越少，丢得越多',
+    apply: (s, ctx) => {
+      const defense = Math.min(1, ctx.guard / Math.max(12, ctx.bees * 0.12));
+      s.honeyLossPct = 0.3 * (1 - defense * 0.75);
+    } },
+  // --- 机遇类 ---
+  { id:'superbloom', w:10, label:'🌸 爆花期', season:['spring','summer'],
+    desc:'漫山遍野都开了，采蜜大丰收',
+    apply: s => { s.honeyMult = 1.75; } },
+  { id:'swarm', w:7, label:'🐝 野生蜂群并入', season:['spring','summer'],
+    desc:'一群无主的蜂找上门来',
+    apply: s => { s.beeGain = 'swarm'; } },
+  { id:'goldenrod', w:8, label:'🌼 秋日蜜源', season:['autumn'],
+    desc:'一片晚开的花田，补了一波过冬的蜜',
+    apply: s => { s.honeyBonus = 'goldenrod'; } },
+];
+
+const WEATHER = {
+  bloom: [
+    { key:'rich',   label:'花期丰沛', mult:1.30, desc:'采蜜 +30%' },
+    { key:'normal', label:'花期平常', mult:1.00, desc:'采蜜正常' },
+    { key:'poor',   label:'花期萧条', mult:0.68, desc:'采蜜 −32%' },
+  ],
+  winter: [
+    { key:'mild',   label:'暖冬', mult:0.78, desc:'越冬耗蜜 −22%' },
+    { key:'normal', label:'常冬', mult:1.00, desc:'越冬耗蜜正常' },
+    { key:'harsh',  label:'严冬', mult:1.35, desc:'越冬耗蜜 +35%' },
+  ],
+};
 
 let state = {
-  year: 1,
-  bees: 100,
-  honeyCarryover: 0,
-  history: [],
-  attemptsThisYear: 0,
-  difficulty: 1.0,   // 威胁难度倍率,随"上一年打得怎样"浮动,不是单纯随年数上涨
-  peakBees: 100,     // 历史最高蜂群规模,用来判定"是不是弱势蜂群"
+  year: 1, bees: 100, honeyCarryover: 0, cells: CONFIG.startingCells,
+  difficulty: 1.0, peakBees: 100, attemptsThisYear: 0,
+  lastAlloc: null, weather: null,
 };
 
-const seasonNames = { spring: '🌸 春', summer: '☀️ 夏', autumn: '🍂 秋', winter: '❄️ 冬' };
+const seasonNames = { spring:'🌸 春', summer:'☀️ 夏', autumn:'🍂 秋', winter:'❄️ 冬' };
+const JOBS = ['forage','nurse','guard','build'];
+const JOB_CN = { forage:'采集', nurse:'育幼', guard:'守卫', build:'筑巢' };
 
-function rand(min, max) { return min + Math.random() * (max - min); }
-function round(n) { return Math.round(n); }
+function rand(a,b){ return a + Math.random()*(b-a); }
+function round(n){ return Math.round(n); }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
 
-// 滑块的值直接就是"实际蜂数",三个滑块之和永远等于 state.bees(会随蜂群规模变化)
-function syncSliders(changed) {
-  const ids = ['forage', 'nurse', 'guard'];
+document.getElementById('closeIntro').addEventListener('click', () => {
+  document.getElementById('introBox').style.display = 'none';
+});
+
+function rollWeather(){
+  state.weather = { bloom: pick(WEATHER.bloom), winter: pick(WEATHER.winter) };
+  // 前兆:今年可能有事,但不告诉你是什么 —— 玩家据此决定要不要留安全余量
+  state.omen = Math.random() < CONFIG.omenChance;
+}
+
+// 按季节抽一个突发事件(加权)
+function rollEvent(season){
+  const chance = CONFIG.eventChance + (state.omen ? CONFIG.omenEventBoost : 0);
+  if (Math.random() >= chance) return null;
+  const pool = EVENTS.filter(e => e.season.includes(season));
+  const totalW = pool.reduce((s,e)=>s+e.w, 0);
+  let r = Math.random() * totalW;
+  for (const e of pool){ r -= e.w; if (r <= 0) return e; }
+  return pool[pool.length-1];
+}
+function renderForecast(){
+  const w = state.weather;
+  let html = `<span>🌻 今年花期：<b>${w.bloom.label}</b>（${w.bloom.desc}）</span>
+     <span>❄️ 冬季预报：<b>${w.winter.label}</b>（${w.winter.desc}）</span>`;
+  if (state.omen){
+    html += `<span style="color:var(--amber-deep)">⚡ <b>蜂群有些躁动</b>（说不清为什么，今年怕是不太平）</span>`;
+  }
+  document.getElementById('forecastBox').innerHTML = html;
+}
+
+function syncSliders(changed){
   const total = state.bees;
   let vals = {};
-  ids.forEach(id => vals[id] = parseInt(document.getElementById(id + 'Slider').value) || 0);
-
-  let sum = vals.forage + vals.nurse + vals.guard;
+  JOBS.forEach(j => vals[j] = parseInt(document.getElementById(j+'Slider').value) || 0);
+  let sum = JOBS.reduce((s,j)=>s+vals[j],0);
   let diff = total - sum;
 
-  if (diff !== 0) {
-    const others = ids.filter(id => id !== changed);
-    let otherSum = others.reduce((s, id) => s + vals[id], 0);
-    if (otherSum === 0) {
+  if (diff !== 0){
+    const others = JOBS.filter(j => j !== changed);
+    let otherSum = others.reduce((s,j)=>s+vals[j],0);
+    if (otherSum === 0){
       vals[others[0]] = Math.max(0, vals[others[0]] + diff);
     } else {
       let assigned = 0;
-      others.forEach((id, idx) => {
-        let share = idx === others.length - 1
-          ? diff - assigned
-          : Math.round(diff * (vals[id] / otherSum));
-        vals[id] = Math.max(0, vals[id] + share);
+      others.forEach((j,i) => {
+        const share = i === others.length-1 ? diff-assigned : Math.round(diff*(vals[j]/otherSum));
+        vals[j] = Math.max(0, vals[j]+share);
         assigned += share;
       });
     }
   }
-
-  ids.forEach(id => {
-    const slider = document.getElementById(id + 'Slider');
-    slider.max = total;
-    slider.value = vals[id];
-    document.getElementById(id + 'Count').textContent = vals[id] + ' 只';
+  JOBS.forEach(j => {
+    const s = document.getElementById(j+'Slider');
+    s.max = total; s.value = vals[j];
+    document.getElementById(j+'Count').textContent = vals[j] + ' 只';
   });
-
-  renderBar(vals, total);
+  renderBar(vals,total); renderInheritHints(vals); renderEstimate(vals);
   return vals;
 }
 
-function renderBar(vals, total) {
-  const bar = document.getElementById('barTotal');
-  const pct = k => total > 0 ? (vals[k] / total * 100) : 0;
-  bar.innerHTML = `
-    <div style="width:${pct('forage')}%; background:var(--forage);"></div>
-    <div style="width:${pct('nurse')}%; background:var(--nurse);"></div>
-    <div style="width:${pct('guard')}%; background:var(--guard);"></div>
-  `;
+function renderBar(vals,total){
+  const pct = k => total>0 ? (vals[k]/total*100) : 0;
+  document.getElementById('barTotal').innerHTML =
+    JOBS.map(j=>`<div style="width:${pct(j)}%; background:var(--${j});"></div>`).join('');
 }
 
-['forage', 'nurse', 'guard'].forEach(id => {
-  document.getElementById(id + 'Slider').addEventListener('input', () => syncSliders(id));
-});
+function renderInheritHints(vals){
+  JOBS.forEach(j => {
+    const el = document.getElementById(j+'Inherit');
+    if (!state.lastAlloc){ el.textContent=''; return; }
+    const was = state.lastAlloc[j] || 0;
+    const d = vals[j] - was;
+    if (d === 0){ el.textContent = `去年 ${was} 只 · 未变动`; el.style.color='var(--text-soft)'; }
+    else if (d > 0){ el.textContent = `去年 ${was} 只 · 增加 ${d}`; el.style.color='var(--green)'; }
+    else { el.textContent = `去年 ${was} 只 · 减少 ${-d}`; el.style.color='var(--amber-deep)'; }
+  });
+}
 
-function initSlidersForNewTotal() {
-  // 按上一次的比例(或默认 45/30/25)重新铺到新的蜂群总数上
-  const ids = ['forage', 'nurse', 'guard'];
-  const defaults = { forage: 0.45, nurse: 0.30, guard: 0.25 };
-  ids.forEach(id => {
-    document.getElementById(id + 'Slider').max = state.bees;
-    document.getElementById(id + 'Slider').value = round(state.bees * defaults[id]);
+// 模糊预估:给方向不给答案。评估结果带刻意的误差,玩家无法据此精确计算
+function renderEstimate(vals){
+  const w = state.weather, S = 3;
+  const estHoneyGross = state.honeyCarryover + vals.forage*CONFIG.honeyPerForager*w.bloom.mult*S;
+  const estNewBees = round(vals.nurse*CONFIG.nurseGrowthRate*S);
+  const estNurseCost = round(estNewBees*CONFIG.nurseHoneyCost);
+  const estHoney = Math.max(0, estHoneyGross - estNurseCost);
+  const estBees = state.bees + estNewBees;
+  const estCells = state.cells + round(vals.build*CONFIG.cellsPerBuilder*S);
+  const estWinterHoney = estBees*CONFIG.winterHoneyPerBee*w.winter.mult;
+  const estCellNeed = estBees*CONFIG.cellsPerBee + estWinterHoney*CONFIG.cellsPerHoney;
+  const underdog = state.bees < state.peakBees*CONFIG.underdogThreshold;
+  const estHornet = CONFIG.hornetBaseStrength * state.difficulty * (underdog?CONFIG.underdogDiscount:1);
+
+  // 比值 → 定性描述。注意:实际结果还会受随机事件/胡蜂损失影响,所以这只是"预感"
+  function verdict(have, need){
+    if (need <= 0) return { lv: 3, txt: '充裕', cls: 'ok' };
+    const r = have / need;
+    if (r >= 1.35) return { lv: 3, txt: '充裕', cls: 'ok' };
+    if (r >= 1.05) return { lv: 2, txt: '大致够用', cls: 'ok' };
+    if (r >= 0.85) return { lv: 1, txt: '偏紧', cls: 'mid' };
+    if (r >= 0.6)  return { lv: 0, txt: '恐怕不够', cls: 'danger' };
+    return { lv: -1, txt: '远远不够', cls: 'danger' };
+  }
+
+  const vHoney = verdict(estHoney, estWinterHoney);
+  const vCell  = verdict(estCells, estCellNeed);
+  // 守卫的评估要更保守:实际来袭强度有 ±35% 随机,而且一年可能来好几次
+  // 所以按"最坏情况"来给感觉,避免玩家踩着及格线走
+  const vGuard = verdict(vals.guard, estHornet * 1.2);
+
+  document.getElementById('estRows').innerHTML = `
+    <div class="e-row ${vHoney.cls}"><span>🍯 越冬的蜜</span><span class="e-val">${vHoney.txt}</span></div>
+    <div class="e-row ${vCell.cls}"><span>⬡ 巢房空间</span><span class="e-val">${vCell.txt}</span></div>
+    <div class="e-row ${vGuard.cls}"><span>🛡 守卫兵力</span><span class="e-val">${vGuard.txt}</span></div>
+    <div class="e-row"><span>🐝 预计年底规模</span><span class="e-val">${estBees > state.bees ? '约 '+estBees+' 只' : '不会增长'}</span></div>`;
+
+  // 只在明显危险时才提示,而且只说风险,不说解法
+  let warns = [];
+  if (vHoney.lv <= 0) warns.push({cls:'', txt:`⚠️ 照这个配置，冬天的蜜恐怕不够烧。`});
+  if (vCell.lv  <= 0) warns.push({cls:'', txt:`⚠️ 巢房可能挤不下 —— 住不进去的蜂熬不过冬天。`});
+  if (vGuard.lv <= 0) warns.push({cls:'', txt:`⚠️ 守卫单薄，胡蜂来了多半顶不住。`});
+  if (state.omen && vHoney.lv <= 1)
+    warns.push({cls:'mild', txt:`⚡ 今年蜂群躁动，万一出点岔子，这点余量未必兜得住。`});
+  if (vals.nurse === 0) warns.push({cls:'mild', txt:`💡 没有育幼蜂，今年不会有新蜂出生。`});
+  if (vals.forage === 0) warns.push({cls:'mild', txt:`💡 没有采集蜂，今年一滴蜜都不产。`});
+  document.getElementById('warnBox').innerHTML =
+    warns.map(x=>`<div class="warn-item ${x.cls}">${x.txt}</div>`).join('');
+}
+
+JOBS.forEach(j => document.getElementById(j+'Slider')
+  .addEventListener('input', () => syncSliders(j)));
+
+function initSlidersForYear(){
+  const total = state.bees;
+  let base;
+  if (state.lastAlloc){
+    const lastSum = JOBS.reduce((s,j)=>s+state.lastAlloc[j],0) || 1;
+    base = {}; let assigned = 0;
+    JOBS.forEach((j,i) => {
+      if (i === JOBS.length-1) base[j] = total - assigned;
+      else { base[j] = round(total*state.lastAlloc[j]/lastSum); assigned += base[j]; }
+    });
+  } else {
+    base = { forage: round(total*0.40), nurse: round(total*0.25), guard: round(total*0.20), build: 0 };
+    base.build = total - base.forage - base.nurse - base.guard;
+  }
+  JOBS.forEach(j => {
+    const s = document.getElementById(j+'Slider');
+    s.max = total; s.value = Math.max(0, base[j]);
   });
   syncSliders('forage');
+  document.getElementById('allocSub').innerHTML = state.lastAlloc
+    ? `滑块已按<b>去年存活下来的工种结构</b>铺好 —— 你是在它的基础上调整，不是从零重排`
+    : `滑块数值是<b>实际蜂数</b>，拖一个，其余会自动让位`;
 }
-initSlidersForNewTotal();
 
-function updateStateBar() {
+function updateStateBar(){
   document.getElementById('yearNum').textContent = state.year;
   document.getElementById('beeNum').textContent = state.bees;
   document.getElementById('honeyNum').textContent = round(state.honeyCarryover);
-
-  const underdog = state.bees < state.peakBees * CONFIG.underdogThreshold;
-  const effDiff = state.difficulty * (underdog ? CONFIG.underdogDiscount : 1);
-  let txt = `本年威胁难度 ${effDiff.toFixed(2)}x`;
-  if (underdog) txt += `(蜂群比历史峰值(${state.peakBees})缩水不少,已触发翻盘保护,打了 ${Math.round(CONFIG.underdogDiscount*100)}% 折)`;
-  document.getElementById('threatInfo').textContent = txt;
+  document.getElementById('cellNum').textContent = state.cells;
 }
-updateStateBar();
 
+rollWeather(); renderForecast(); updateStateBar(); initSlidersForYear();
 document.getElementById('startBtn').addEventListener('click', runYear);
 
-function runYear() {
-  const vals = syncSliders('forage'); // 读取当前分配(不改变),vals 就是实际蜂数
-  // 注意:这三个是"可变"的,战斗损失会真实扣减对应岗位,不是整年固定值
-  let forageBees = vals.forage;
-  let nurseBees = vals.nurse;
-  let guardBees = vals.guard;
-  const initAlloc = { forage: vals.forage, nurse: vals.nurse, guard: vals.guard }; // 留存年初分配用于结算展示
+function runYear(){
+  const vals = syncSliders('forage');
+  const initAlloc = { ...vals };
+  let job = { ...vals };
+  let honey = state.honeyCarryover, bees = state.bees, cells = state.cells;
+  let youngBees = 0;   // 今年出生的幼蜂:计入蜂群总数,但明年才进入岗位分配池
+  const w = state.weather;
+  let log = [], collapsed = false;
+  let carryPenalty = 1;   // 上一季事件的后遗症(如干旱影响下一季)
 
-  let honey = state.honeyCarryover;
-  let bees = state.bees;
-  let log = [];
-  let collapsed = false;
-
-  const seasons = ['spring', 'summer', 'autumn'];
-  seasons.forEach(season => {
+  ['spring','summer','autumn'].forEach(season => {
     if (collapsed) return;
+    let sl = { title: seasonNames[season], lines: [], cls: 'good' };
 
-    // 产蜜
-    const yieldMult = rand(0.75, 1.25);
-    const produced = round(forageBees * CONFIG.honeyPerForager * yieldMult);
-    honey += produced;
-
-    // 育幼(消耗蜂蜜)
-    let newBees = round(nurseBees * CONFIG.nurseGrowthRate);
-    const nurseCost = round(newBees * CONFIG.nurseHoneyCost);
-    if (nurseCost > honey) {
-      const ratio = honey / Math.max(nurseCost, 1);
-      newBees = round(newBees * ratio);
-      honey = 0;
-    } else {
-      honey -= nurseCost;
+    // ① 抽突发事件,改写这一季的系数
+    const ev = rollEvent(season);
+    let mod = { honeyMult:1, broodMult:1, honeyLossPct:0, cellLossPct:0,
+                beeLossPct:0, beeGain:null, honeyBonus:null, nextSeasonPenalty:1 };
+    if (ev){
+      ev.apply(mod, { guard: job.guard, bees, honey });
+      sl.lines.push(`<b style="color:var(--amber-deep)">${ev.label}</b> —— ${ev.desc}`);
+      if (mod.honeyMult<1 || mod.broodMult<1 || mod.honeyLossPct>0 ||
+          mod.cellLossPct>0 || mod.beeLossPct>0) sl.cls = 'warn';
     }
+
+    // ② 采蜜(花期 × 事件 × 上季后遗症)
+    const produced = round(job.forage*CONFIG.honeyPerForager*w.bloom.mult
+                           * mod.honeyMult * carryPenalty * rand(0.82,1.18));
+    honey += produced;
+    if (mod.honeyBonus === 'goldenrod'){
+      const bonus = round(job.forage*0.5 + 12);
+      honey += bonus;
+      sl.lines.push(`　↳ 额外采到 ${bonus} 蜜`);
+    }
+
+    const built = round(job.build*CONFIG.cellsPerBuilder*rand(0.85,1.15));
+    cells += built;
+
+    let newBees = round(job.nurse*CONFIG.nurseGrowthRate*mod.broodMult);
+    const nurseCost = round(newBees*CONFIG.nurseHoneyCost);
+    if (nurseCost > honey){ newBees = round(newBees*(honey/Math.max(nurseCost,1))); honey = 0; }
+    else honey -= nurseCost;
     bees += newBees;
 
-    // 新出生的幼蜂按年初分配的比例补充到各岗位,保持"岗位之和 = 蜂群总数"
-    if (newBees > 0) {
-      const base = initAlloc.forage + initAlloc.nurse + initAlloc.guard;
-      if (base > 0) {
-        const fAdd = round(newBees * initAlloc.forage / base);
-        const nAdd = round(newBees * initAlloc.nurse / base);
-        const gAdd = newBees - fAdd - nAdd;
-        forageBees += fAdd;
-        nurseBees += nAdd;
-        guardBees += gAdd;
-      }
+    // 野生蜂群并入
+    if (mod.beeGain === 'swarm'){
+      const gain = round(rand(0.12,0.22)*bees) + 8;
+      bees += gain; youngBees += gain;
+      sl.lines.push(`　↳ 并入 ${gain} 只野生蜂（明年可分配）`);
     }
 
-    let seasonLog = { title: seasonNames[season], lines: [], cls: 'good' };
-    seasonLog.lines.push(`采集了 ${produced} 蜂蜜,新增 ${newBees} 只幼蜂(花掉 ${nurseCost} 蜜哺育)`);
+    // 新蜂不进入当年岗位 —— 明年才成为劳动力(符合日龄换岗的真实逻辑)
+    // 这样:①战损是真实损失,不会被新蜂悄悄补回 ②系统不会替玩家改写年初的分配
+    youngBees += newBees;
+    sl.lines.push(`采蜜 ${produced}（${w.bloom.label}）· 造巢房 ${built} 格 · 新增 ${newBees} 只幼蜂（耗蜜 ${nurseCost}，明年上岗）`);
 
-    // 胡蜂事件
-    // 所需守卫数 = 基准值 × 当前威胁难度倍率 × (弱势蜂群翻盘保护折扣) × 随机波动
-    // 难度倍率不是固定随年份涨,而是随"上一年表现"浮动;蜂群明显缩水时还有额外折扣
-    if (Math.random() < CONFIG.hornetChance[season]) {
-      const underdog = state.bees < state.peakBees * CONFIG.underdogThreshold;
-      const effectiveDifficulty = state.difficulty * (underdog ? CONFIG.underdogDiscount : 1);
-      const needed = round(CONFIG.hornetBaseStrength * effectiveDifficulty * rand(0.75, 1.35));
-      if (guardBees >= needed) {
-        const loss = round(guardBees * CONFIG.guardLossOnWin);
-        guardBees = Math.max(0, guardBees - loss);  // 牺牲的守卫真实减员,下次来袭时守卫更少
-        bees -= loss;
-        seasonLog.lines.push(`🐝⚔️🐝 胡蜂来袭!守卫 ${guardBees + loss} 只 ≥ 需要 ${needed} 只 → 蜂球焖杀成功,牺牲 ${loss} 只守卫蜂(剩余守卫 ${guardBees} 只)`);
-        seasonLog.cls = 'good';
+    // 事件造成的直接损失
+    if (mod.honeyLossPct > 0){
+      const l = round(honey*mod.honeyLossPct);
+      honey = Math.max(0, honey-l);
+      sl.lines.push(`　↳ 损失 ${l} 储蜜`);
+    }
+    if (mod.cellLossPct > 0){
+      const l = round(cells*mod.cellLossPct);
+      cells = Math.max(0, cells-l);
+      sl.lines.push(`　↳ 毁掉 ${l} 格巢房`);
+    }
+    if (mod.beeLossPct > 0){
+      const l = round(bees*mod.beeLossPct);
+      const alive = JOBS.reduce((s,j)=>s+job[j],0);
+      if (alive > 0){
+        let assigned = 0;
+        JOBS.forEach((j,i) => {
+          const x = i===JOBS.length-1 ? Math.min(job[j], l-assigned) : Math.min(job[j], round(l*job[j]/alive));
+          job[j] = Math.max(0, job[j]-x); assigned += x;
+        });
+      }
+      bees = Math.max(0, bees-l);
+      sl.lines.push(`　↳ 损失 ${l} 只蜂`);
+    }
+
+    carryPenalty = mod.nextSeasonPenalty;
+
+    if (Math.random() < CONFIG.hornetChance[season]){
+      const underdog = bees < state.peakBees*CONFIG.underdogThreshold;
+      const effD = state.difficulty*(underdog?CONFIG.underdogDiscount:1);
+      const needed = round(CONFIG.hornetBaseStrength*effD*rand(0.75,1.35));
+      if (job.guard >= needed){
+        const loss = round(job.guard*CONFIG.guardLossOnWin);
+        const before = job.guard;
+        job.guard = Math.max(0, job.guard-loss); bees -= loss;
+        sl.lines.push(`🐝⚔️ 胡蜂来袭！守卫 ${before} ≥ 需要 ${needed} → 焖杀成功，牺牲 ${loss} 只（剩 ${job.guard}）`);
       } else {
-        const shortfall = (needed - guardBees) / needed;
-        const honeyLoss = round(honey * shortfall * CONFIG.raidHoneyLossFactor);
-        const beeLoss = round(bees * shortfall * CONFIG.raidBeeLossFactor);
-        honey = Math.max(0, honey - honeyLoss);
-
-        // 损失按各岗位当前占比分摊,而不是只扣总数
-        const alive = forageBees + nurseBees + guardBees;
-        if (alive > 0) {
-          const fLoss = Math.min(forageBees, round(beeLoss * forageBees / alive));
-          const nLoss = Math.min(nurseBees, round(beeLoss * nurseBees / alive));
-          const gLoss = Math.min(guardBees, beeLoss - fLoss - nLoss);
-          forageBees -= fLoss;
-          nurseBees -= nLoss;
-          guardBees = Math.max(0, guardBees - gLoss);
+        const short = (needed-job.guard)/needed;
+        const hLoss = round(honey*short*CONFIG.raidHoneyLossFactor);
+        const bLoss = round(bees*short*CONFIG.raidBeeLossFactor);
+        honey = Math.max(0, honey-hLoss);
+        const alive = JOBS.reduce((s,j)=>s+job[j],0);
+        if (alive > 0){
+          let assigned = 0;
+          JOBS.forEach((j,i) => {
+            const l = i===JOBS.length-1 ? Math.min(job[j], bLoss-assigned) : Math.min(job[j], round(bLoss*job[j]/alive));
+            job[j] = Math.max(0, job[j]-l); assigned += l;
+          });
         }
-        bees = Math.max(0, bees - beeLoss);
-        seasonLog.lines.push(`🐝⚔️🐝 胡蜂来袭!守卫只有 ${guardBees} 只,需要约 ${needed} 只才能焖杀成功 → 失败,损失 ${honeyLoss} 蜜、${beeLoss} 只蜂`);
-        seasonLog.cls = 'warn';
+        bees = Math.max(0, bees-bLoss);
+        sl.lines.push(`🐝⚔️ 胡蜂来袭！守卫只有 ${job.guard}，需要约 ${needed} → 失败，损失 ${hLoss} 蜜、${bLoss} 只蜂`);
+        sl.cls = 'warn';
       }
     }
-
-    log.push(seasonLog);
-
-    if (bees < CONFIG.minColonySize) {
-      collapsed = true;
-    }
+    log.push(sl);
+    if (bees < CONFIG.minColonySize) collapsed = true;
   });
 
-  // 越冬
-  let winterLog = { title: seasonNames.winter, lines: [], cls: 'good' };
-  let survived = false;
-  let carryover = 0;
-  const preWinterBees = bees; // 记下入冬前的规模,用来判断是不是"惨胜"
+  let wl = { title: seasonNames.winter+`（${w.winter.label}）`, lines: [], cls: 'good' };
+  let survived = false, carryover = 0;
+  const preWinterBees = bees;
 
-  if (!collapsed) {
-    const winterNeed = round(bees * CONFIG.winterHoneyPerBee);
-    if (honey >= winterNeed) {
-      survived = true;
-      carryover = round((honey - winterNeed) * CONFIG.carryoverRatio);
-      winterLog.lines.push(`储蜜 ${round(honey)},越冬需要 ${winterNeed} → 充足,安然过冬,结转 ${carryover} 蜜到明年`);
+  if (!collapsed){
+    const need = round(bees*CONFIG.winterHoneyPerBee*w.winter.mult);
+    let deaths = 0;
+    const cellNeed = round(bees*CONFIG.cellsPerBee + Math.min(honey,need)*CONFIG.cellsPerHoney);
+
+    if (cells < cellNeed){
+      const overflow = cellNeed - cells;
+      const cd = Math.min(bees, round(overflow/CONFIG.cellsPerBee*CONFIG.crowdingDeathRate));
+      deaths += cd;
+      wl.lines.push(`巢房 ${cells} 格 < 需要 ${cellNeed} 格 → 挤不下，${cd} 只蜂冻死在巢外`);
+      wl.cls = 'warn';
     } else {
-      const shortfall = (winterNeed - honey) / winterNeed;
-      const deathRatio = Math.min(1, shortfall);
-      const deaths = round(bees * deathRatio);
-      const remaining = bees - deaths;
-      winterLog.lines.push(`储蜜 ${round(honey)},越冬需要 ${winterNeed},缺口 ${round(winterNeed - honey)} → ${deaths} 只蜂未能撑过冬天`);
-      winterLog.cls = 'warn';
-      if (remaining < CONFIG.minColonySize) {
-        collapsed = true;
-        winterLog.lines.push(`剩余仅 ${Math.max(0,remaining)} 只,蜂群规模过小,宣告崩溃`);
-      } else {
-        survived = true;
-        bees = remaining;
+      wl.lines.push(`巢房 ${cells} 格 ≥ 需要 ${cellNeed} 格 → 蜂群顺利结球，全员有位置`);
+    }
+
+    if (honey >= need){
+      carryover = round((honey-need)*CONFIG.carryoverRatio);
+      wl.lines.push(`储蜜 ${round(honey)} ≥ 越冬需要 ${need} → 燃料充足，结转 ${carryover} 蜜`);
+    } else {
+      const short = (need-honey)/need;
+      const starve = round((bees-deaths)*Math.min(1,short));
+      deaths += starve;
+      wl.lines.push(`储蜜 ${round(honey)} < 越冬需要 ${need}（缺 ${round(need-honey)}）→ ${starve} 只蜂饿死`);
+      wl.cls = 'warn';
+    }
+
+    const remaining = Math.max(0, bees-deaths);
+    if (remaining < CONFIG.minColonySize){
+      collapsed = true;
+      wl.lines.push(`最终只剩 ${remaining} 只，蜂群规模过小，宣告崩溃`);
+    } else {
+      survived = true;
+      // 死亡按比例摊到各岗位和幼蜂上
+      if (deaths > 0 && bees > 0){
+        const ratio = remaining / bees;
+        JOBS.forEach(j => job[j] = Math.max(0, round(job[j]*ratio)));
+        youngBees = Math.max(0, round(youngBees*ratio));
+      }
+      bees = remaining;
+      // 熬过冬天的幼蜂,明年成为劳动力:按现有结构并入岗位池
+      if (youngBees > 0){
+        const base = JOBS.reduce((s,j)=>s+job[j],0);
+        let assigned = 0;
+        JOBS.forEach((j,i) => {
+          const add = i===JOBS.length-1
+            ? youngBees-assigned
+            : (base>0 ? round(youngBees*job[j]/base) : round(youngBees/JOBS.length));
+          job[j] += add; assigned += add;
+        });
+        wl.lines.push(`开春后，${youngBees} 只去年出生的蜂加入劳动力`);
       }
     }
   } else {
-    winterLog.lines.push('蜂群已在秋季前崩溃,没能撑到冬天');
-    winterLog.cls = 'warn';
+    wl.lines.push('蜂群已在秋季前崩溃，没能撑到冬天');
+    wl.cls = 'warn';
   }
-  log.push(winterLog);
+  log.push(wl);
 
-  // 惨胜判定:技术上活下来了,但入冬前的规模死了超过 1/3,不该被标成轻松的"活下来了"
-  const pyrrhic = survived && preWinterBees > 0 && (preWinterBees - bees) / preWinterBees > 0.33;
-
-  showResult({ log, survived, collapsed, pyrrhic, finalBees: bees, carryover, alloc: vals,
-               forageBees: initAlloc.forage, nurseBees: initAlloc.nurse, guardBees: initAlloc.guard });
+  const pyrrhic = survived && preWinterBees>0 && (preWinterBees-bees)/preWinterBees > 0.33;
+  showResult({ log, survived, pyrrhic, finalBees: bees, carryover, finalCells: cells, survivingJobs: job, initAlloc });
 }
 
-function showResult({ log, survived, collapsed, pyrrhic, finalBees, carryover, alloc, forageBees, nurseBees, guardBees }) {
+function showResult({ log, survived, pyrrhic, finalBees, carryover, finalCells, survivingJobs, initAlloc }){
   document.getElementById('allocPanel').style.display = 'none';
   document.getElementById('resultArea').style.display = 'block';
+  document.getElementById('seasonLog').innerHTML = log.map(s =>
+    `<div class="season ${s.cls}"><div class="head">${s.title}</div>
+     <div class="body">${s.lines.join('<br>')}</div></div>`).join('');
 
-  const seasonLog = document.getElementById('seasonLog');
-  seasonLog.innerHTML = log.map(s => `
-    <div class="season ${s.cls}">
-      <div class="head">${s.title}</div>
-      <div class="body">${s.lines.join('<br>')}</div>
-    </div>
-  `).join('');
-
-  const verdictBox = document.getElementById('verdictBox');
-  const actionRow = document.getElementById('actionRow');
-
+  const vb = document.getElementById('verdictBox');
+  const ar = document.getElementById('actionRow');
   state.attemptsThisYear++;
+  const allocTxt = JOBS.map(j=>`${JOB_CN[j]} ${initAlloc[j]}`).join(' · ');
 
-  if (survived && !pyrrhic) {
-    verdictBox.className = 'verdict survive';
-    verdictBox.innerHTML = `
-      <div class="big">✅ 活下来了 —— 第 ${state.year} 年结束,蜂群 ${finalBees} 只</div>
-      <ul>
-        <li>本次分配:采集 ${forageBees} · 育幼 ${nurseBees} · 守卫 ${guardBees}</li>
-        <li>结转 ${carryover} 蜜到下一年,开局不再是 0</li>
-      </ul>
-    `;
-  } else if (survived && pyrrhic) {
-    verdictBox.className = 'verdict pyrrhic';
-    verdictBox.innerHTML = `
-      <div class="big">⚠️ 惨胜 —— 第 ${state.year} 年结束,蜂群只剩 ${finalBees} 只</div>
-      <ul>
-        <li>本次分配:采集 ${forageBees} · 育幼 ${nurseBees} · 守卫 ${guardBees}</li>
-        <li>技术上活下来了,但入冬前的规模掉了超过 1/3 —— 看上面的记录,是蜜不够还是胡蜂打崩的</li>
-        <li>结转 ${carryover} 蜜到下一年</li>
-      </ul>
-    `;
+  if (survived && !pyrrhic){
+    vb.className = 'verdict survive';
+    vb.innerHTML = `<div class="big">✅ 活下来了 —— 第 ${state.year} 年结束，蜂群 ${finalBees} 只</div>
+      <ul><li>本次分配：${allocTxt}</li><li>巢房 ${finalCells} 格 · 结转 ${carryover} 蜜</li></ul>`;
+  } else if (survived && pyrrhic){
+    vb.className = 'verdict pyrrhic';
+    vb.innerHTML = `<div class="big">⚠️ 惨胜 —— 第 ${state.year} 年结束，蜂群只剩 ${finalBees} 只</div>
+      <ul><li>本次分配：${allocTxt}</li>
+      <li>入冬前规模掉了超过 1/3 —— 看上面记录，是蜜不够、巢房不够，还是胡蜂打崩的</li>
+      <li>巢房 ${finalCells} 格 · 结转 ${carryover} 蜜</li></ul>`;
   }
 
-  if (survived) {
-    actionRow.innerHTML = `
-      <button id="retryBtn">🔁 再试这一年</button>
-      <button class="recommend" id="nextYearBtn">进入第 ${state.year + 1} 年 →</button>
-    `;
+  if (survived){
+    ar.innerHTML = `<button id="retryBtn">🔁 再试这一年</button>
+      <button class="recommend" id="nextYearBtn">进入第 ${state.year+1} 年 →</button>`;
     document.getElementById('historyPanel').style.display = 'block';
-    addHistory(true, forageBees, nurseBees, guardBees, finalBees);
-
+    addHistory(true, initAlloc, finalBees);
     document.getElementById('nextYearBtn').addEventListener('click', () => {
-      // 难度浮动:守住且没明显缩水 → 难度上升;明显缩水 → 难度回落,给喘息空间;介于两者间 → 持平
-      const grew = finalBees >= state.peakBees * 0.95;
-      const shrankBad = finalBees < state.peakBees * 0.85;
-      if (grew) {
-        state.difficulty += CONFIG.hornetDifficultyGrowth;
-      } else if (shrankBad) {
-        state.difficulty = Math.max(CONFIG.hornetDifficultyFloor, state.difficulty - CONFIG.hornetDifficultyRelief);
-      }
+      const grew = finalBees >= state.peakBees*0.95;
+      const shrank = finalBees < state.peakBees*0.85;
+      if (grew) state.difficulty += CONFIG.hornetDifficultyGrowth;
+      else if (shrank) state.difficulty = Math.max(CONFIG.hornetDifficultyFloor, state.difficulty-CONFIG.hornetDifficultyRelief);
       state.peakBees = Math.max(state.peakBees, finalBees);
-
-      state.year++;
-      state.bees = finalBees;
-      state.honeyCarryover = carryover;
-      state.attemptsThisYear = 0;
-      resetToAlloc(true); // true = 蜂群规模变了,滑块按新总数重新铺开
+      state.year++; state.bees = finalBees; state.honeyCarryover = carryover;
+      state.cells = finalCells; state.lastAlloc = survivingJobs; state.attemptsThisYear = 0;
+      rollWeather(); renderForecast(); resetToAlloc(true);
     });
   } else {
-    verdictBox.className = 'verdict collapse';
-    verdictBox.innerHTML = `
-      <div class="big">💀 蜂群崩溃 —— 没能撑过第 ${state.year} 年</div>
-      <ul>
-        <li>本次分配:采集 ${forageBees} · 育幼 ${nurseBees} · 守卫 ${guardBees}</li>
-        <li>看看上面的记录,是哪个环节垮的:胡蜂?还是越冬储蜜不够?</li>
-      </ul>
-    `;
-    actionRow.innerHTML = `<button class="recommend" id="retryBtn" style="flex:1;">🔁 换个分配,再试一次这一年</button>`;
-    addHistory(false, forageBees, nurseBees, guardBees, 0);
+    vb.className = 'verdict collapse';
+    vb.innerHTML = `<div class="big">💀 蜂群崩溃 —— 没能撑过第 ${state.year} 年</div>
+      <ul><li>本次分配：${allocTxt}</li>
+      <li>看上面的记录，是哪个环节垮的：胡蜂？蜜不够？还是巢房挤不下？</li></ul>`;
+    ar.innerHTML = `<button class="recommend" id="retryBtn" style="flex:1;">🔁 换个分配，再试一次这一年</button>`;
+    addHistory(false, initAlloc, 0);
   }
-
   document.getElementById('retryBtn').addEventListener('click', () => resetToAlloc(false));
 }
 
-function addHistory(ok, f, n, g, result) {
-  const list = document.getElementById('historyList');
+function addHistory(ok, alloc, result){
   const item = document.createElement('div');
   item.className = 'history-item';
-  item.innerHTML = `
-    <span>第${state.year}年 · 第${state.attemptsThisYear}次 · 采${f}/育${n}/守${g}</span>
-    <span>${ok ? `存活(${result}只)` : '崩溃'}<span class="tag ${ok ? 'ok' : 'no'}">${ok ? '✓' : '✕'}</span></span>
-  `;
-  list.prepend(item);
+  const a = JOBS.map(j=>`${JOB_CN[j][0]}${alloc[j]}`).join('/');
+  item.innerHTML = `<span>第${state.year}年·第${state.attemptsThisYear}次 · ${a}</span>
+    <span>${ok?`存活(${result})`:'崩溃'}<span class="tag ${ok?'ok':'no'}">${ok?'✓':'✕'}</span></span>`;
+  document.getElementById('historyList').prepend(item);
 }
 
-function resetToAlloc(rescale) {
+function resetToAlloc(newYear){
   document.getElementById('allocPanel').style.display = 'block';
   document.getElementById('resultArea').style.display = 'none';
   updateStateBar();
-  if (rescale) {
-    initSlidersForNewTotal(); // 蜂群规模变了(进入下一年),按新总数重新铺开滑块
-  } else {
-    // "再试这一年":总数没变,只需确保滑块上限是最新的,并重新画一下比例条
-    syncSliders('forage');
-  }
+  if (newYear) initSlidersForYear(); else syncSliders('forage');
 }
 </script>
 </body>
