@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>蜂年 · 实时原型</title>
+<style>
+  :root {
+    --bg: #F5F1E8; --bg-panel: #EBE4D8; --bg-deep: #E2D9C8;
+    --text: #3A3229; --text-soft: #7A6E5F; --line: #D4C9B6;
+    --amber: #D4B85A; --amber-deep: #B8983A;
+    --red: #B85C4A; --green: #6F8A4E;
+    --forage: #E5B033; --nurse: #8B6BA8; --guard: #C4453F; --build: #5B8A72;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #211C15; --bg-panel: #2A2419; --bg-deep: #332B1E;
+      --text: #EDE6D8; --text-soft: #B0A490; --line: #423A2A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #211C15; --bg-panel: #2A2419; --bg-deep: #332B1E;
+    --text: #EDE6D8; --text-soft: #B0A490; --line: #423A2A;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.6 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 16px; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 12px; }
+  header h1 { font-size: 20px; margin: 0; }
+  .clock { font-size: 17px; font-weight: 700; }
+  .clock small { font-weight: 400; color: var(--text-soft); margin-left: 6px; }
+  .speed { display: flex; gap: 4px; margin-left: auto; }
+  .speed button { min-width: 44px; }
+  button { font: inherit; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--bg-panel); color: var(--text); cursor: pointer; }
+  button:hover:not(:disabled) { border-color: var(--amber-deep); }
+  button.on { background: var(--amber); color: #2a2419; border-color: var(--amber-deep); font-weight: 700; }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { background: var(--amber); color: #2a2419; border-color: var(--amber-deep); font-weight: 700; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } .speed { margin-left: 0; } }
+  .panel { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .panel h2 { font-size: 15px; margin: 0 0 10px; }
+  .panel .sub { color: var(--text-soft); font-size: 13px; margin: -6px 0 10px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+  @media (max-width: 760px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  .stat .v { font-size: 20px; font-weight: 700; }
+  .stat .l { font-size: 12px; color: var(--text-soft); }
+  .stat.warn .v { color: var(--red); }
+  .bar { height: 6px; background: var(--bg-deep); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--amber); }
+  .stat.warn .bar > i { background: var(--red); }
+  .job { margin-bottom: 12px; }
+  .job .top { display: flex; justify-content: space-between; align-items: baseline; }
+  .job .name { font-weight: 700; }
+  .job .name small { display: block; font-weight: 400; font-size: 12px; color: var(--text-soft); margin-left: 16px; }
+  .job .right { white-space: nowrap; }
+  .job .num { font-variant-numeric: tabular-nums; }
+  .job .num .moving { color: var(--amber-deep); font-size: 12px; margin-left: 4px; }
+  input[type=range] { width: 100%; }
+  input[type=range]:disabled { opacity: .45; }
+  .lock { font-size: 13px; color: var(--text-soft); margin-left: 8px; cursor: pointer; user-select: none; white-space: nowrap; }
+  .lock input { vertical-align: -2px; margin: 0 3px 0 0; }
+  .job.locked .name { opacity: .75; }
+  .rest { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px;
+    border: 1px dashed var(--line); border-radius: 8px; margin-bottom: 4px; }
+  .rest.none { color: var(--text-soft); }
+  .rest.some { border-color: var(--amber-deep); }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  .obs { min-height: 150px; }
+  .obs .row { padding: 7px 0; border-bottom: 1px dashed var(--line); }
+  .obs .row:last-child { border-bottom: 0; }
+  .obs .row .days { color: var(--amber-deep); font-weight: 700; white-space: nowrap; }
+  .obs .row.faint { color: var(--text-soft); }
+  .obs .door { color: var(--text-soft); font-size: 13px; margin-top: 8px; }
+  .log { max-height: 220px; overflow-y: auto; font-size: 14px; }
+  .log div { padding: 3px 0; }
+  .log .d { color: var(--text-soft); font-size: 12px; margin-right: 6px; }
+  .log .bad { color: var(--red); }
+  .log .good { color: var(--green); }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .diag { font: 12px/1.5 ui-monospace, Consolas, monospace; color: var(--text-soft); white-space: pre-wrap; margin-top: 12px; }
+  .overlay { position: fixed; inset: 0; background: rgba(20,16,10,.72); display: none;
+    align-items: flex-start; justify-content: center; padding: 40px 16px; z-index: 50; overflow: auto; }
+  .overlay.show { display: flex; }
+  .card { background: var(--bg-panel); color: var(--text); border: 1px solid var(--line);
+    border-radius: 14px; padding: 22px; max-width: 560px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+  .card h2 { margin-top: 0; font-size: 19px; }
+  .card .soft { color: var(--text-soft); font-size: 14px; }
+  .card textarea { width: 100%; font: 12px/1.5 ui-monospace, Consolas, monospace; background: var(--bg-deep);
+    color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  .qrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 14px; }
+  .qrow button.sel { outline: 3px solid var(--amber-deep); }
+  .banner { background: var(--bg-deep); border-radius: 8px; padding: 6px 10px; font-size: 13px; color: var(--text-soft); margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🐝 蜂年 · 实时原型</h1>
+    <div class="clock" id="clock">第 1 年 · 春 · 第 1 天</div>
+    <div class="speed" id="speed">
+      <button data-s="0">⏸</button>
+      <button data-s="1" class="on">1×</button>
+      <button data-s="2">2×</button>
+      <button data-s="4">4×</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner">把工蜂分到四个岗位，随时可以改。蜂不会说话，但会用行为告诉你它们缺什么 —— 看右边的"蜂群观察"。</div>
+
+  <div class="stats">
+    <div class="stat"><div class="v" id="sBees">—</div><div class="l">蜂群</div></div>
+    <div class="stat" id="stHoney"><div class="v" id="sHoney">—</div><div class="l" id="sHoneyL">蜂蜜</div><div class="bar"><i id="bHoney"></i></div></div>
+    <div class="stat"><div class="v" id="sCells">—</div><div class="l" id="sCellsL">巢房</div><div class="bar"><i id="bCells"></i></div></div>
+    <div class="stat"><div class="v" id="sBrood">—</div><div class="l">子脾(在长的幼虫和蛹)</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>分配工蜂</h2>
+      <p class="sub">拖动滑块改比例，其余自动让位；勾选"固定"的岗位不参与让位。改完几天内逐步生效。</p>
+      <div id="jobs"></div>
+      <div class="rest none" id="restRow"><span id="restTxt">💤 没有歇工的蜂</span><button id="restBtn" disabled>派回岗位</button></div>
+      <div class="actions">
+        <button id="splitBtn" title="分出四成蜂去新家">✂️ 分蜂</button>
+        <button id="dexBtn">📖 图鉴</button>
+      </div>
+    </div>
+    <div class="panel obs">
+      <h2>🔍 蜂群观察</h2>
+      <div id="obs"></div>
+      <div class="door" id="door"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:12px;">
+    <h2>📜 日志</h2>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="actions">
+    <button id="endBtn">🏁 结束试玩并生成反馈</button>
+    <button id="restartBtn">🔄 从头开始</button>
+  </div>
+  <div class="diag" id="diag"></div>
+</div>
+
+<div class="overlay" id="overlay"><div class="card" id="card"></div></div>
+
+<script src="realtime_sim.js?v=2"></script><!-- 改了 realtime_sim.js 就把 v 加一,否则浏览器会用缓存里的旧版 -->
+<script>
+'use strict';
+const Sim = window.BeeSim;
+const PARAMS = new URLSearchParams(location.search);
+const DEBUG = PARAMS.get('debug') === '1';
+const SEC_PER_DAY = 2.5;
+const WINTER_SPEED = 8;
+
+const JOB = {
+  forage: { name: '采集', hint: '出门采蜜采粉', color: 'var(--forage)' },
+  nurse:  { name: '育幼', hint: '喂幼虫，决定新蜂出生多快', color: 'var(--nurse)' },
+  guard:  { name: '守卫', hint: '守巢门，防胡蜂和盗蜂', color: 'var(--guard)' },
+  build:  { name: '筑巢', hint: '接收采回的蜜、造巢房', color: 'var(--build)' },
+};
+const SEASON_CN = { spring: '春', summer: '夏', autumn: '秋', winter: '冬' };
+
+// 信号:只描述看到的行为,不说该怎么做(02 §9)
+const SIG = {
+  waggle:  { icon: '💃', name: '摇摆舞', see: '巢门口有蜂在跳摇摆舞（走 8 字，中间一段摆动腹部）',
+             explain: '这是<b>摇摆舞</b>。采集蜂找到了好花源、回来又能顺利卸下蜜时，就会跳这支舞招呼同伴一起去。<br>跳得越久，说明外面的花越值得去。' },
+  tremble: { icon: '〰️', name: '颤抖舞', see: '储蜜区有蜂在跳颤抖舞（边走边全身抖动，不停转向）',
+             explain: '这是<b>颤抖舞</b>。采集蜂带着蜜回来，却半天等不到筑巢蜂来接，就会这样抖。<br>巢房太满、找不到空房存蜜的时候也会这样。' },
+  shake:   { icon: '🤝', name: '摇晃信号', see: '蜂在互相抓住对方，上下摇晃',
+             explain: '这是<b>摇晃信号</b>。连日下雨时采集蜂出不了门，有一批就歇工了。天晴以后，蜂会抓住歇工的同伴摇一摇，喊它们回去干活。<br>歇工的蜂不干活，但照样吃蜜、照样变老，而且不会自己回岗位。' },
+  guard:   { icon: '🛡', name: '守卫警戒', see: '巢门口的守卫抬起前足，一直在戒备',
+             explain: '这是<b>守卫警戒</b>。门外有东西在试探，过几天可能就会动手。<br>守卫不够的时候，这种戒备会一直持续。' },
+  nurse:   { icon: '🥚', name: '空巢房待产', see: '子脾区空着一大片巢房，蜂王在里面巡房',
+             explain: '子脾区有大片空巢房，蜂王在巡房，却没法多产卵 —— 照顾幼虫的蜂不够。' },
+  idle:    { icon: '🍇', name: '闲蜂', see: '巢门外挂着一串串闲蜂，不进也不出',
+             explain: '这是蜂群<b>准备分蜂</b>的样子：蜂群长够大了。<br>如果一直不管，它们会带着老蜂王自己飞走一大半。你可以主动分蜂。' },
+};
+const SIG_ORDER = ['idle', 'guard', 'tremble', 'waggle', 'nurse', 'shake'];
+const SIG_JOB = { waggle: 'forage', tremble: 'build', guard: 'guard', nurse: 'nurse' };
+
+// ---------------- 状态 ----------------
+let s, yearSnap, speed = 1, lastSpeed = 1, acc = 0, lastT = 0, paused = false;
+let pct = {}, locked = {}, logLines = [];
+const M = newMetrics();
+
+function newMetrics() {
+  return { t0: Date.now(), changes: [], episodes: [], firstSeen: {}, deaths: 0, reloads: 0,
+    splits: 0, natSwarms: 0, maxYear: 1, speedTime: { 0: 0, 1: 0, 2: 0, 4: 0 }, pauses: 0,
+    dexOpens: 0, yearsDone: [], openEp: {}, reassigns: 0 };
+}
+
+function start(seed) {
+  s = Sim.createState(seed != null ? { seed } : {});
+  yearSnap = Sim.snapshot(s);
+  pct = {}; locked = {}; Sim.JOBS.forEach(j => pct[j] = Math.round(s.target[j] * 100));
+  logLines = [];
+  addLog(`🌸 第 1 年开春了（${s.yr.bloomLabel}）`);
+  buildJobs(); render();
+}
+
+// ---------------- 分配滑块 ----------------
+function buildJobs() {
+  const el = document.getElementById('jobs');
+  el.innerHTML = Sim.JOBS.map(j => `
+    <div class="job" id="job_${j}">
+      <div class="top">
+        <span class="name"><span class="dot" style="background:${JOB[j].color}"></span>${JOB[j].name}<small>${JOB[j].hint}</small></span>
+        <span class="right"><span class="num" id="n_${j}"></span><label class="lock" title="固定后，调整其他岗位时这一项的百分比不变"><input type="checkbox" id="l_${j}">固定</label></span>
+      </div>
+      <input type="range" min="0" max="100" value="${pct[j]}" id="r_${j}">
+    </div>`).join('');
+  Sim.JOBS.forEach(j => {
+    const r = document.getElementById('r_' + j);
+    r.addEventListener('input', () => { rebalance(j, +r.value); renderJobs(); });
+    r.addEventListener('change', commitTarget);
+    document.getElementById('l_' + j).addEventListener('change', e => {
+      locked[j] = e.target.checked;
+      r.disabled = locked[j];
+      document.getElementById('job_' + j).classList.toggle('locked', locked[j]);
+    });
+  });
+}
+// 拖一个滑块时,只在"没固定"的岗位之间让位;固定的岗位百分比不变
+function rebalance(j, v) {
+  const lockedSum = Sim.JOBS.filter(x => x !== j && locked[x]).reduce((a, x) => a + pct[x], 0);
+  const free = Sim.JOBS.filter(x => x !== j && !locked[x]);
+  const max = 100 - lockedSum;
+  v = free.length ? Math.min(v, max) : max;   // 其余都固定了,这一项也动不了
+  const rest = max - v, sum = free.reduce((a, x) => a + pct[x], 0);
+  pct[j] = v;
+  let used = 0;
+  free.forEach((x, i) => {
+    const nv = i === free.length - 1 ? rest - used
+      : Math.round(sum > 0 ? pct[x] / sum * rest : rest / free.length);
+    pct[x] = Math.max(0, Math.min(rest - used, nv)); used += pct[x];
+  });
+  Sim.JOBS.forEach(x => document.getElementById('r_' + x).value = pct[x]);
+}
+function commitTarget() {
+  const before = Object.assign({}, s.target);
+  const t = {}; Sim.JOBS.forEach(j => t[j] = pct[j] / 100);
+  Sim.setTarget(s, t);
+  M.changes.push({ y: s.year, d: s.day, from: before, to: Object.assign({}, s.target) });
+  checkResponses();
+  renderJobs();
+}
+function renderJobs() {
+  const tot = s.working();
+  Sim.JOBS.forEach(j => {
+    const cur = s.jobs[j], goal = s.target[j] * tot;
+    const moving = Math.abs(cur - goal) > Math.max(2, tot * 0.02);
+    document.getElementById('n_' + j).innerHTML =
+      `${pct[j]}% · 现在约 ${fmtBees(cur)}${moving ? `<span class="moving">${goal > cur ? '↗' : '↘'} 调整中</span>` : ''}`;
+  });
+}
+
+// ---------------- 显示 ----------------
+function fmtBees(n) { const real = n * 100; return real >= 10000 ? `${(real / 10000).toFixed(1)} 万只` : `${Math.round(real / 100) * 100} 只`; }
+function winterNeed() { return Math.round(s.bees() * 2.2); }
+
+function render() {
+  const d = s.day, sea = Sim.seasonOf(d);
+  const inSeason = sea === 'winter' ? d - 3 * Sim.CFG.S + 1 : d % Sim.CFG.S + 1;
+  const w = Sim.WEATHER[s.weather];
+  document.getElementById('clock').innerHTML =
+    `第 ${s.year} 年 · ${SEASON_CN[sea]} · 第 ${inSeason} 天 <small>${sea === 'winter' ? '❄️ 冬天快进中' : w.icon + ' ' + w.label}</small>`;
+
+  document.getElementById('sBees').textContent = '约 ' + fmtBees(s.bees());
+  const need = winterNeed(), honey = Math.round(s.honey);
+  const short = (sea === 'autumn' || sea === 'winter') && honey < need;
+  document.getElementById('sHoney').textContent = honey + ' 格';
+  document.getElementById('sHoneyL').textContent = `蜂蜜 · 过冬约需 ${need} 格`;
+  document.getElementById('stHoney').classList.toggle('warn', short);
+  document.getElementById('bHoney').style.width = Math.min(100, honey / Math.max(1, need) * 100) + '%';
+  const layers = Math.ceil(s.cells / Sim.CFG.cellsPerLayer);
+  const used = s.broodTotal() + s.honey;
+  document.getElementById('sCells').textContent = Math.round(s.cells) + ' 格';
+  document.getElementById('sCellsL').textContent = `巢房 · ${layers} 层巢脾 · 用了 ${Math.round(used / s.cells * 100)}%`;
+  document.getElementById('bCells').style.width = Math.min(100, used / s.cells * 100) + '%';
+  document.getElementById('sBrood').textContent = Math.round(s.broodTotal());
+
+  renderJobs();
+  renderObs();
+  document.getElementById('splitBtn').disabled = s.bees() < 200 || s.dead;
+  const rest = s.rest || 0, hasRest = rest >= 0.5;
+  document.getElementById('restTxt').textContent = hasRest ? `💤 歇工的蜂：约 ${fmtBees(rest)}（不干活，照样吃蜜）` : '💤 没有歇工的蜂';
+  document.getElementById('restBtn').disabled = !hasRest || Sim.seasonOf(s.day) === 'winter';
+  document.getElementById('restRow').className = 'rest ' + (hasRest ? 'some' : 'none');
+  document.getElementById('log').innerHTML = logLines.slice(-40).reverse().map(l =>
+    `<div class="${l.c || ''}"><span class="d">${l.when}</span>${l.text}</div>`).join('');
+  if (DEBUG) {
+    const D = s.diag;
+    document.getElementById('diag').textContent =
+      `flow ${D.flow?.toFixed(2)} raw ${D.raw?.toFixed(1)} cap ${D.cap?.toFixed(1)} W ${D.W?.toFixed(2)} fill ${D.fill?.toFixed(2)} occ ${D.occ?.toFixed(2)} eggs ${D.eggs} swarm ${D.swarm} threat ${D.threat || '-'} diff ${s.difficulty.toFixed(2)}\n` +
+      `sig ${JSON.stringify(s.sig, (k, v) => typeof v === 'number' ? +v.toFixed(2) : v)}\nstreak ${JSON.stringify(s.streak)}`;
+  }
+}
+
+// 每种信号用自己的量词:靠数量和持续时间表达,不靠"更用力"(02 §9)
+const COUNT = {
+  waggle:  ['几只', '好几只', '很多只'],
+  tremble: ['几只', '好几只', '很多只'],
+  shake:   ['几只', '好几只', '很多只'],
+  guard:   ['几只守卫', '好几只守卫', '一大群守卫'],
+  nurse:   ['一小片', '一片', '一大片'],
+  idle:    ['一小串', '好几串', '挂得满满的'],
+};
+function countWord(k, level) { const w = COUNT[k]; return level >= 0.6 ? w[2] : level >= 0.4 ? w[1] : w[0]; }
+function renderObs() {
+  const rows = [];
+  if (Sim.seasonOf(s.day) === 'winter') {
+    rows.push(`<div class="row">❄️ 蜂群抱成一团取暖，外层的蜂慢慢和里层的换位置</div>`);
+  } else {
+    SIG_ORDER.forEach(k => {
+      const lv = s.sig[k] || 0, st = s.streak[k] || 0;
+      if (lv <= 0) return;
+      let extra = '';
+      if (k === 'guard' && s.threat) extra = s.threat.kind === 'hornet' ? '　门外有胡蜂在盘旋' : '　有别家的蜂在巢门口转悠';
+      if (k === 'shake') extra = `　巢里有约 ${fmtBees(s.rest)}歇着`;
+      if (lv >= Sim.CFG.sigThresh) {
+        rows.push(`<div class="row">${SIG[k].icon} ${SIG[k].see}　<b>${countWord(k, lv)}</b>${extra}　<span class="days">已经 ${st} 天</span></div>`);
+      } else {
+        rows.push(`<div class="row faint">${SIG[k].icon} 偶尔有一两只：${SIG[k].see}${extra}</div>`);
+      }
+    });
+    if (!rows.length) rows.push(`<div class="row faint">蜂群看起来很平静，各干各的。</div>`);
+  }
+  document.getElementById('obs').innerHTML = rows.join('');
+  const traffic = s.jobs.forage * Sim.WEATHER[s.weather].f;
+  const door = Sim.seasonOf(s.day) === 'winter' ? '巢门口几乎没有蜂进出' :
+    s.weather === 'rain' ? '下雨，采集蜂都待在巢里' :
+    traffic > 120 ? '巢门口采集蜂进进出出，非常密' : traffic > 60 ? '巢门口采集蜂来来往往' :
+    traffic > 25 ? '巢门口有一些采集蜂进出' : '巢门口稀稀拉拉，很少有蜂进出';
+  document.getElementById('door').textContent = '🚪 ' + door;
+}
+
+function addLog(text, c) {
+  const sea = Sim.seasonOf(s.day);
+  const inSeason = sea === 'winter' ? s.day - 3 * Sim.CFG.S + 1 : s.day % Sim.CFG.S + 1;
+  logLines.push({ when: `${s.year}年${SEASON_CN[sea]}${inSeason}日`, text, c });
+}
+
+// ---------------- 时间 ----------------
+function setSpeed(v) {
+  speed = v; if (v > 0) lastSpeed = v;
+  document.querySelectorAll('#speed button').forEach(b => b.classList.toggle('on', +b.dataset.s === v));
+}
+function pause() { if (speed > 0) { setSpeed(0); } }
+function resume() { setSpeed(lastSpeed || 1); }
+
+function frame(t) {
+  const dt = lastT ? Math.min(0.25, (t - lastT) / 1000) : 0; lastT = t;
+  M.speedTime[speed] = (M.speedTime[speed] || 0) + dt;
+  if (speed > 0 && !s.dead && !overlayOpen()) {
+    const winter = Sim.seasonOf(s.day) === 'winter';
+    acc += dt * (winter ? WINTER_SPEED : speed) / SEC_PER_DAY;
+    let n = 0;
+    while (acc >= 1 && n < 20 && !s.dead && !overlayOpen()) { acc -= 1; n++; tickDay(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+function tickDay() {
+  const prevYear = s.year;
+  Sim.step(s);
+  let stop = null;
+  s.events.forEach(e => {
+    if (e.t === 'firstsig') { if (!M.firstSeen[e.sig]) { M.firstSeen[e.sig] = { y: s.year, d: s.day }; stop = stop || (() => showExplain(e.sig)); } return; }
+    if (e.t === 'layer') { addLog(e.text); return; }
+    if (e.t === 'newyear') return;
+    addLog(e.text, e.t === 'bad' || e.t === 'dead' ? 'bad' : e.t === 'good' ? 'good' : '');
+    if (/自己分蜂/.test(e.text)) M.natSwarms++;
+    if (e.t === 'bad' && !/蜜吃光/.test(e.text) || e.t === 'event') stop = stop || (() => { pause(); });
+  });
+  trackEpisodes();
+  if (s.dead) { M.deaths++; render(); showDeath(); return; }
+  if (s.year !== prevYear) { onNewYear(prevYear); return; }
+  render();
+  if (stop) stop();
+}
+
+// ---------------- 行为记录:看到信号后有没有调整 ----------------
+function trackEpisodes() {
+  Object.keys(SIG).forEach(k => {
+    const P = k === 'shake' ? 1 : Sim.CFG.sigPersist;
+    const st = s.streak[k] || 0;
+    if (st === P && !M.openEp[k]) {
+      const ep = { sig: k, y: s.year, d: s.day, t0: s.target[SIG_JOB[k]] || 0, resp: null };
+      M.episodes.push(ep); M.openEp[k] = ep;
+      if (k === 'idle') { addLog('🍇 巢门外挂满了闲蜂'); pause(); }
+    }
+    if (st === 0 && M.openEp[k]) M.openEp[k] = null;
+  });
+}
+function checkResponses() {
+  const now = s.year * 1000 + s.day;
+  M.episodes.forEach(ep => {
+    if (ep.resp !== null || !SIG_JOB[ep.sig]) return;
+    const age = now - (ep.y * 1000 + ep.d);
+    if (age > 12) return;
+    if (s.target[SIG_JOB[ep.sig]] - ep.t0 >= 0.02) ep.resp = age;
+  });
+}
+
+// ---------------- 弹窗 ----------------
+function overlayOpen() { return document.getElementById('overlay').classList.contains('show'); }
+function showCard(html, onClose) {
+  document.getElementById('card').innerHTML = html;
+  document.getElementById('overlay').classList.add('show');
+  const ok = document.getElementById('cardOk');
+  if (ok) ok.addEventListener('click', () => { closeCard(); if (onClose) onClose(); });
+}
+function closeCard() { document.getElementById('overlay').classList.remove('show'); }
+
+function showExplain(k) {
+  M.pauses++;
+  showCard(`<h2>${SIG[k].icon} 第一次看到：${SIG[k].name}</h2>
+    <p>${SIG[k].see}。</p><p>${SIG[k].explain}</p>
+    <p class="soft">这个说明只出现一次，之后可以在"📖 图鉴"里再看。</p>
+    <button class="primary" id="cardOk">知道了，继续</button>`);
+}
+
+function showDex() {
+  M.dexOpens++;
+  const seen = Object.keys(SIG).filter(k => M.firstSeen[k]);
+  showCard(`<h2>📖 图鉴</h2>
+    ${seen.length ? seen.map(k => `<p><b>${SIG[k].icon} ${SIG[k].name}</b><br><span class="soft">${SIG[k].see}</span><br>${SIG[k].explain}</p>`).join('')
+      : '<p class="soft">还没有看到过任何信号。</p>'}
+    <p class="soft">一共有 ${Object.keys(SIG).length} 种，已见过 ${seen.length} 种。每种信号偶尔出现是正常的，一直不停才说明蜂群需要什么。</p>
+    <button class="primary" id="cardOk">关闭</button>`);
+}
+
+function onNewYear(prevYear) {
+  const h = s.history[s.history.length - 1];
+  M.maxYear = Math.max(M.maxYear, s.year);
+  M.yearsDone.push({ year: prevYear, bees: Math.round(h.bees), winterStart: Math.round(h.winterStart) });
+  // 今年的信号回顾
+  const eps = M.episodes.filter(e => e.y === prevYear);
+  const recap = Object.keys(SIG).map(k => {
+    const n = eps.filter(e => e.sig === k).length;
+    return n ? `${SIG[k].icon} ${SIG[k].name}持续出现过 ${n} 次` : null;
+  }).filter(Boolean);
+  const lost = h.winterStart > 0 ? Math.round((1 - h.bees / h.winterStart) * 100) : 0;
+  yearSnap = Sim.snapshot(s);
+  addLog(`🌸 第 ${s.year} 年开春了（${s.yr.bloomLabel}）`);
+  render();
+  showCard(`<h2>🌸 熬过了第 ${prevYear} 个冬天</h2>
+    <p>入冬时约 ${fmtBees(h.winterStart)}，开春剩下约 ${fmtBees(h.bees)}（冬天少了 ${lost}%）。蜂蜜还剩 ${Math.round(s.honey)} 格。</p>
+    <p>今年分出去 ${s.splits - (M._lastSplits || 0)} 群，自己飞走 ${s.natSwarms - (M._lastNat || 0)} 群。</p>
+    ${recap.length ? `<p><b>今年蜂群持续发出过的信号：</b><br>${recap.join('<br>')}</p>` : '<p class="soft">今年没有哪种信号持续出现。</p>'}
+    <p class="soft">新的一年：${s.yr.bloomLabel}。已自动存档，如果今年崩了可以回到今年春天。</p>
+    <button class="primary" id="cardOk">开始第 ${s.year} 年</button>`);
+  M._lastSplits = s.splits; M._lastNat = s.natSwarms;
+}
+
+function showDeath() {
+  const recent = logLines.filter(l => l.c === 'bad' && l.when.startsWith(s.year + '年')).slice(-5).map(l => `<span class="soft">${l.when}</span> ${l.text}`);
+  showCard(`<h2>💀 蜂群崩溃了（第 ${s.year} 年）</h2>
+    <p><b>最近发生的事：</b><br>${recent.join('<br>') || '—'}</p>
+    <div class="qrow">
+      <button class="primary" id="reloadBtn">↩️ 回到今年春天重来</button>
+      <button id="freshBtn">🔄 从头开始</button>
+    </div>`);
+  document.getElementById('reloadBtn').addEventListener('click', () => {
+    M.reloads++; s = Sim.restore(yearSnap, M.reloads);
+    Sim.JOBS.forEach(j => pct[j] = Math.round(s.target[j] * 100));
+    Sim.JOBS.forEach(j => document.getElementById('r_' + j).value = pct[j]);
+    M.openEp = {}; addLog('↩️ 回到了今年春天'); closeCard(); render();
+  });
+  document.getElementById('freshBtn').addEventListener('click', () => { closeCard(); start(); });
+}
+
+// ---------------- 结束试玩 ----------------
+const Q = [
+  { id: 'read', t: '你能看懂蜂群在"说"什么吗？', o: ['大部分能', '一半一半', '基本看不懂'] },
+  { id: 'bored', t: '有没有觉得无聊、只是在等的时候？', o: ['几乎没有', '有一些', '经常'] },
+  { id: 'again', t: '想不想再玩一年？', o: ['想', '无所谓', '不想'] },
+];
+function showEnd() {
+  pause();
+  const ans = {};
+  showCard(`<h2>🏁 结束试玩</h2>
+    ${Q.map(q => `<div><b>${q.t}</b><div class="qrow" data-q="${q.id}">${q.o.map(o => `<button data-v="${o}">${o}</button>`).join('')}</div></div>`).join('')}
+    <div><b>还有什么想说的？</b>（可留空）<textarea id="free" rows="3"></textarea></div>
+    <div class="qrow"><button class="primary" id="repBtn">生成反馈</button><button id="backBtn">继续玩</button></div>`);
+  document.querySelectorAll('.qrow[data-q] button').forEach(b => b.addEventListener('click', () => {
+    b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel'); ans[b.parentElement.dataset.q] = b.dataset.v;
+  }));
+  document.getElementById('backBtn').addEventListener('click', () => { closeCard(); });
+  document.getElementById('repBtn').addEventListener('click', () => {
+    ans.free = document.getElementById('free').value.trim();
+    showReport(ans);
+  });
+}
+function showReport(ans) {
+  const eps = M.episodes.filter(e => SIG_JOB[e.sig]);
+  const resp = eps.filter(e => e.resp !== null);
+  const lat = resp.map(e => e.resp).sort((a, b) => a - b);
+  const med = lat.length ? lat[Math.floor(lat.length / 2)] : null;
+  const bySig = Object.keys(SIG_JOB).map(k => {
+    const all = eps.filter(e => e.sig === k), ok = all.filter(e => e.resp !== null);
+    return `  ${SIG[k].name}：持续出现 ${all.length} 次，其中 ${ok.length} 次在 12 天内给${JOB[SIG_JOB[k]].name}加了人`;
+  });
+  const idle = M.episodes.filter(e => e.sig === 'idle').length;
+  const mins = Math.round((Date.now() - M.t0) / 60000);
+  const st = M.speedTime, tot = Object.values(st).reduce((a, b) => a + b, 0) || 1;
+  const lines = [
+    '=== 蜂年 实时原型 试玩反馈 ===',
+    `用时约 ${mins} 分钟 · 玩到第 ${s.year} 年 · 崩溃 ${M.deaths} 次 · 读档 ${M.reloads} 次`,
+    `当前蜂群约 ${fmtBees(s.bees())} · 主动分蜂 ${s.splits} 次 · 自己飞走 ${M.natSwarms} 次`,
+    `改分配 ${M.changes.length} 次（平均每年 ${(M.changes.length / Math.max(1, s.year)).toFixed(1)} 次）`,
+    '',
+    '[看到信号后的反应]',
+    `持续信号共 ${eps.length} 次，12 天内做出对应调整 ${resp.length} 次（${eps.length ? Math.round(resp.length / eps.length * 100) : 0}%）` + (med !== null ? `，中位反应 ${med} 天` : ''),
+    ...bySig,
+    (() => { const sh = M.episodes.filter(e => e.sig === 'shake'), ok = sh.filter(e => e.resp !== null);
+      const l = ok.map(e => e.resp).sort((a, b) => a - b);
+      return `  摇晃信号：出现 ${sh.length} 次，其中 ${ok.length} 次在 12 天内把歇工的蜂派回了岗位` + (l.length ? `（中位 ${l[Math.floor(l.length / 2)]} 天）` : ''); })(),
+    `  闲蜂（分蜂提醒）：持续出现 ${idle} 次，主动分蜂 ${s.splits} 次，自己飞走 ${M.natSwarms} 次`,
+    `见过的信号：${Object.keys(M.firstSeen).map(k => SIG[k].name).join('、') || '无'}；翻图鉴 ${M.dexOpens} 次`,
+    '',
+    '[速度使用]',
+    `  暂停 ${Math.round(st[0] / tot * 100)}% · 1× ${Math.round((st[1] || 0) / tot * 100)}% · 2× ${Math.round((st[2] || 0) / tot * 100)}% · 4× ${Math.round((st[4] || 0) / tot * 100)}%`,
+    '',
+    ...Q.map(q => `${q.t} → ${ans[q.id] || '未答'}`),
+  ];
+  if (ans.free) lines.push('留言：' + ans.free);
+  const txt = lines.join('\n');
+  showCard(`<h2>🙏 谢谢！把这段发回来就行</h2>
+    <textarea id="rep" rows="18" readonly></textarea>
+    <div class="qrow"><button class="primary" id="copyBtn">📋 复制</button><button id="cardOk">继续玩</button></div>`);
+  document.getElementById('rep').value = txt;
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    const t = document.getElementById('rep'); t.select();
+    try { document.execCommand('copy'); document.getElementById('copyBtn').textContent = '✅ 已复制'; } catch (e) {}
+  });
+}
+
+// ---------------- 绑定 ----------------
+document.querySelectorAll('#speed button').forEach(b => b.addEventListener('click', () => {
+  const v = +b.dataset.s; if (v === 0) M.pauses++; setSpeed(v);
+}));
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && !overlayOpen() && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault(); if (speed === 0) resume(); else { M.pauses++; pause(); }
+  }
+});
+document.getElementById('restBtn').addEventListener('click', () => {
+  const n = Sim.reassignRest(s);
+  if (n <= 0) return;
+  M.reassigns++;
+  const now = s.year * 1000 + s.day;
+  M.episodes.forEach(ep => {
+    if (ep.sig === 'shake' && ep.resp === null && now - (ep.y * 1000 + ep.d) <= 12) ep.resp = now - (ep.y * 1000 + ep.d);
+  });
+  addLog(`💪 把约 ${fmtBees(n)}歇工的蜂派回了岗位`, 'good');
+  render();
+});
+document.getElementById('splitBtn').addEventListener('click', () => {
+  if (Sim.split(s)) { addLog('✂️ 你分出了一群蜂，它们去了新家', 'good'); M.splits++; render(); }
+});
+document.getElementById('dexBtn').addEventListener('click', showDex);
+document.getElementById('endBtn').addEventListener('click', showEnd);
+document.getElementById('restartBtn').addEventListener('click', () => { if (confirm('从第 1 年重新开始？')) start(); });
+
+start(PARAMS.get('seed') ? +PARAMS.get('seed') : null);
+showCard(`<h2>🐝 蜂年 · 实时原型</h2>
+  <p>你有一箱蜂。把工蜂分到四个岗位：<b>采集、育幼、守卫、筑巢</b>。随时可以改。</p>
+  <p>蜂不会告诉你该怎么分，但它们会用<b>行为</b>表达：跳什么舞、在哪里闲着、守卫是不是在戒备。看"🔍 蜂群观察"。</p>
+  <p><b>目标：让蜂群活过每一个冬天，并且越来越大。</b></p>
+  <p class="soft">时间会自己走，1 倍速约 2.5 秒一天。空格键暂停。重要的事发生时会自动暂停。</p>
+  <button class="primary" id="cardOk">开始</button>`);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
