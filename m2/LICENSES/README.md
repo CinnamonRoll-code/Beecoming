@@ -6,6 +6,7 @@
 |---|---|---|
 | `LXGW-WenKai-OFL.txt` | 字体霞鹜文楷（游戏里用的是裁过字、改过名的子集 `assets/fonts/LXGWWenKai-Subset.ttf`，家族名 "Beecoming Subset"） | OFL 1.1 第 1、2 条：每份拷贝都要附版权行和授权全文 |
 | `Godot-Engine-MIT.txt` | 引擎 | MIT：版权声明和授权全文要随所有拷贝分发 |
+| `MUSIC.md` | 背景音乐 `assets/music/` 的来源和授权（都是公有领域 / CC0，没有署名义务） | 不是义务，是留证据：直播被误判侵权时拿去申诉 |
 
 ## ⚠ 打包时要带上这个目录
 
